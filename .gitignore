@@ -1,0 +1,23 @@
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Компилируемые файлы
+*.o
+*.exe
+*.out
+
+# Логи
+*.log
+
+# Директории
+/build/
+bin/
+obj/
+*.tmp
+
+# Настройки IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
