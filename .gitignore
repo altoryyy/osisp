@@ -2,14 +2,31 @@
 .DS_Store
 Thumbs.db
 
+<<<<<<< HEAD
 # Компилируемые файлы
 *.o
 *.exe
 *.out
+=======
+# Файлы компиляции
+*.o
+*.out
+*.exe
+*.a
+*.so
+*.dSYM
+*.class
+
+# Временные файлы
+*~
+*.tmp
+*.temp
+>>>>>>> 4c590399b280b191963a85ae63e2dd980eb92863
 
 # Логи
 *.log
 
+<<<<<<< HEAD
 # Директории
 /build/
 bin/
@@ -21,3 +38,9 @@ obj/
 .idea/
 *.sublime-project
 *.sublime-workspace
+=======
+# Каталоги сборки
+build/
+bin/
+obj/
+>>>>>>> 4c590399b280b191963a85ae63e2dd980eb92863
