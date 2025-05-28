@@ -49,12 +49,12 @@ void add_to_history(const char *path)
 void init_colors()
 {
     start_color();
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);   // Directories
-    init_pair(2, COLOR_CYAN, COLOR_BLACK);    // Files
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);  // Symlinks
-    init_pair(4, COLOR_RED, COLOR_BLACK);     // Executables
-    init_pair(5, COLOR_MAGENTA, COLOR_BLACK); // Menu
-    init_pair(6, COLOR_BLUE, COLOR_BLACK);    // Info
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_CYAN, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_RED, COLOR_BLACK);
+    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(6, COLOR_BLUE, COLOR_BLACK);
 }
 
 void show_help()
@@ -214,7 +214,6 @@ void display_file_info(const char *file_path)
 
 void edit_text_file(const char *file_path)
 {
-    // Проверяем, является ли файл текстовым (по расширению)
     const char *ext = strrchr(file_path, '.');
     if (ext && (strcmp(ext, ".exe") == 0 || strcmp(ext, ".bin") == 0 ||
                 strcmp(ext, ".so") == 0 || strcmp(ext, ".dll") == 0))
@@ -225,7 +224,6 @@ void edit_text_file(const char *file_path)
         return;
     }
 
-    // Читаем содержимое файла
     FILE *file = fopen(file_path, "r");
     if (!file)
     {
@@ -235,18 +233,15 @@ void edit_text_file(const char *file_path)
         return;
     }
 
-    // Получаем размер файла
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    // Читаем содержимое
     char *content = malloc(file_size + 1);
     size_t bytes_read = fread(content, 1, file_size, file);
     content[bytes_read] = '\0';
     fclose(file);
 
-    // Настройка редактора
     clear();
     attron(COLOR_PAIR(5));
     printw("=== Редактор: %s ===\n", file_path);
@@ -254,7 +249,6 @@ void edit_text_file(const char *file_path)
     attroff(COLOR_PAIR(5));
     refresh();
 
-    // Создаем окно для редактирования
     WINDOW *edit_win = newwin(LINES - 4, COLS - 4, 2, 2);
     keypad(edit_win, TRUE);
     scrollok(edit_win, TRUE);
@@ -262,7 +256,6 @@ void edit_text_file(const char *file_path)
     wprintw(edit_win, "%s", content);
     wrefresh(edit_win);
 
-    // Редактирование
     int ch;
     int cursor_x = 0, cursor_y = 0;
     bool modified = false;
@@ -289,7 +282,6 @@ void edit_text_file(const char *file_path)
         case 127:
             if (cursor_x > 0)
             {
-                // Удаляем символ
                 for (int i = cursor_x - 1; i < strlen(content); i++)
                 {
                     content[i] = content[i + 1];
@@ -299,14 +291,12 @@ void edit_text_file(const char *file_path)
             }
             break;
         case '\n':
-            // Вставка новой строки
             cursor_x = 0;
             cursor_y++;
             break;
         default:
             if (isprint(ch))
             {
-                // Вставка символа
                 memmove(content + cursor_x + 1, content + cursor_x, strlen(content) - cursor_x + 1);
                 content[cursor_x] = ch;
                 cursor_x++;
@@ -315,7 +305,6 @@ void edit_text_file(const char *file_path)
             break;
         }
 
-        // Обновляем содержимое окна
         werase(edit_win);
         wprintw(edit_win, "%s", content);
         wmove(edit_win, cursor_y, cursor_x);
@@ -324,7 +313,6 @@ void edit_text_file(const char *file_path)
 
     if (ch == KEY_F(2))
     {
-        // Сохраняем изменения
         file = fopen(file_path, "w");
         if (file)
         {
@@ -368,13 +356,11 @@ void delete_file(const char *path)
 
 void copy_file(const char *src, const char *dest)
 {
-    // Проверяем, является ли dest директорией
     struct stat dest_stat;
     char final_dest[2048];
 
     if (stat(dest, &dest_stat) == 0 && S_ISDIR(dest_stat.st_mode))
     {
-        // Если dest - директория, копируем с исходным именем
         const char *filename = strrchr(src, '/');
         filename = filename ? filename + 1 : src;
         snprintf(final_dest, sizeof(final_dest), "%s/%s", dest, filename);
@@ -412,7 +398,7 @@ void copy_file(const char *src, const char *dest)
             printw("\nОшибка записи в файл назначения\n");
             fclose(src_file);
             fclose(dest_file);
-            remove(final_dest); // Удаляем частично скопированный файл
+            remove(final_dest);
             refresh();
             getch();
             return;
@@ -422,7 +408,6 @@ void copy_file(const char *src, const char *dest)
     fclose(src_file);
     fclose(dest_file);
 
-    // Сохраняем права доступа
     struct stat src_stat;
     stat(src, &src_stat);
     chmod(final_dest, src_stat.st_mode);
@@ -434,7 +419,6 @@ void copy_file(const char *src, const char *dest)
 
 void move_file(const char *src, const char *dest)
 {
-    // Пытаемся сделать rename (работает в пределах одной файловой системы)
     if (rename(src, dest) == 0)
     {
         printw("\nФайл перемещен успешно\n");
@@ -443,7 +427,6 @@ void move_file(const char *src, const char *dest)
         return;
     }
 
-    // Если rename не сработал, делаем копирование + удаление
     copy_file(src, dest);
     if (remove(src) == 0)
     {
@@ -557,7 +540,6 @@ void list_directory(const char *path)
         return;
     }
 
-    // Получаем список файлов
     struct dirent *entry;
     char *files[1024];
     int count = 0;
@@ -571,9 +553,6 @@ void list_directory(const char *path)
     }
     closedir(dir);
 
-    // Сортируем файлы
-    // qsort(files, count, sizeof(char *), (int (*)(const void *, const void *))strcmp);
-
     int page = 0;
     int total_pages = (count + PAGE_SIZE - 1) / PAGE_SIZE;
     int selected = 0;
@@ -581,16 +560,13 @@ void list_directory(const char *path)
     while (1)
     {
         clear();
-        // Отображаем заголовок
         attron(COLOR_PAIR(5));
         printw("=== %s === (Страница %d/%d)\n", path, page + 1, total_pages);
         attroff(COLOR_PAIR(5));
 
-        // Отображаем меню действий
         printw("n-Создать файл  e-Редактировать  d-Удалить  c-Копировать  m-Перемещение  f-Поиск  ");
         printw("u-Диск  ?-Помощь  q-Выход\n\n");
 
-        // Отображаем файлы на текущей странице
         int start = page * PAGE_SIZE;
         int end = (page + 1) * PAGE_SIZE;
         if (end > count)
@@ -604,13 +580,11 @@ void list_directory(const char *path)
             struct stat file_info;
             stat(fullpath, &file_info);
 
-            // Выделяем текущий выбранный элемент
             if (i == start + selected)
             {
                 attron(A_REVERSE);
             }
 
-            // Разные цвета для разных типов файлов
             if (S_ISDIR(file_info.st_mode))
             {
                 attron(COLOR_PAIR(1));
@@ -642,11 +616,9 @@ void list_directory(const char *path)
             printw("  %10lld bytes  %s", (long long)file_info.st_size, date_str);
         }
 
-        // Подсказка для навигации
         printw("\nСтрелки: Навигация  Enter: Выбрать  < >: Страницы  b: Назад  h: Домой\n");
         refresh();
 
-        // Обработка ввода
         int ch = getch();
         switch (ch)
         {
@@ -674,7 +646,6 @@ void list_directory(const char *path)
             break;
         case '\n':
         {
-            // Открытие файла/каталога
             int idx = page * PAGE_SIZE + selected;
             char next_path[2048];
             snprintf(next_path, sizeof(next_path), "%s/%s", path, files[idx]);
@@ -695,7 +666,6 @@ void list_directory(const char *path)
         }
         case 'b':
         {
-            // На уровень вверх
             char parent[2048];
             strncpy(parent, path, sizeof(parent));
             char *last_slash = strrchr(parent, '/');
@@ -708,7 +678,6 @@ void list_directory(const char *path)
             break;
         }
         case 'h':
-            // Домашний каталог
             list_directory(getenv("HOME"));
             return;
         case 'f':
@@ -722,15 +691,13 @@ void list_directory(const char *path)
             break;
         case 'n':
         {
-            // Создать новый файл
             create_new_file(path);
-            return; // Обновляем список
+            return;
         }
         case 'k':
         {
-            // Создать каталог
             create_new_directory(path);
-            return; // Обновляем список
+            return;
         }
         case 'q':
             return;
@@ -739,7 +706,6 @@ void list_directory(const char *path)
         }
     }
 
-    // Освобождаем память
     for (int i = 0; i < count; i++)
     {
         free(files[i]);

@@ -16,4 +16,4 @@ void create_new_file(const char *path);
 void create_new_directory(const char *path);
 void init_colors();
 
-#endif // FILE_EDITOR_H
+#endif

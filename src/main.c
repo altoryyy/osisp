@@ -11,7 +11,7 @@ int main(void)
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
-    curs_set(0); // Скрываем курсор
+    curs_set(0);
 
     init_colors();
 
