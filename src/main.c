@@ -1,45 +1,23 @@
 #include <locale.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <ncurses.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include "../headers/file_editor.h"
 
 int main(void)
 {
     setlocale(LC_ALL, "");
     initscr();
-    cbreak();             // Включаем режим cbreak
-    noecho();             // Отключаем вывод вводимых символов
-    keypad(stdscr, TRUE); // Включаем поддержку дополнительных клавиш
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    curs_set(0); // Скрываем курсор
 
-    char current_path[1024];
-    getcwd(current_path, sizeof(current_path));
+    init_colors();
 
-    while (1)
-    {
-        list_directory(current_path);
-        char ch = getch(); // Ожидание ввода
+    char *home = getenv("HOME");
+    list_directory(home ? home : ".");
 
-        if (ch == 'q')
-        {
-            break; // Выход
-        }
-        else if (ch == 'b')
-        {
-            char *last_slash = strrchr(current_path, '/');
-            if (last_slash != NULL && last_slash != current_path)
-            {
-                *last_slash = '\0'; // Возврат на уровень вверх
-            }
-        }
-        else if (ch == 'f')
-        {
-            search_file(current_path);
-        }
-    }
-
-    endwin(); // Завершение работы ncurses
+    endwin();
     return 0;
 }
